@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     allowedHosts: [
-      process.env.VITE_ALLOWED_HOST
+      process.env.VITE_ALLOWED_HOST || 'localhost'
     ]
   }
 })
