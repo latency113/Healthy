@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { GindeeLogo } from '../components/GindeeLogo';
-import { calculateAge, calculateBmi, calculateCalories } from '../utils/calculations';
+import { DatePickerModal } from './profile-wizard/DatePickerModal';
+import { showAlert } from '../utils/alert';
+import { calculateBmi, calculateCalories } from '../utils/calculations';
 import runningTreadmillImg from '../assets/running_treadmill.png';
 
 interface ProfileWizardViewProps {
@@ -49,23 +51,25 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
   onSubmit,
 }) => {
   const [step, setStep] = useState(1);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleBirthdayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setBirthday(val);
-    if (val) {
-      const computedAge = calculateAge(val);
-      setAge(computedAge);
-    }
+  const formatDisplay = (isoDate: string): string => {
+    if (!isoDate) return '';
+    const parts = isoDate.split('-');
+    if (parts.length !== 3) return '';
+    const [y, m, d] = parts;
+    const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    return `${parseInt(d, 10)} ${months[parseInt(m, 10) - 1]} ${parseInt(y, 10) + 543}`;
   };
 
   const activeBmiInfo = calculateBmi(weight, height);
   const calorieGoal = calculateCalories(weight, height, age, gender, activityLevel, goal);
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] flex flex-col">
+    <div className="min-h-screen bg-[#faf5f6] flex flex-col">
       {/* Header Bar */}
-      <div className="bg-[#fbc02d] px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
+      <div className="bg-white border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
         <button
           onClick={() => {
             if (step > 1) {
@@ -74,14 +78,14 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
               navigateTo('/');
             }
           }}
-          className="w-9 h-9 rounded-full bg-[#0066FF] flex items-center justify-center text-white hover:bg-blue-700 transition"
+          className="w-9 h-9 rounded-full bg-pink-500 flex items-center justify-center text-white hover:bg-pink-600 transition shadow-sm"
           aria-label="ย้อนกลับ"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-        
+
         <GindeeLogo />
 
         <div className="w-9 h-9" /> {/* Spacer */}
@@ -89,10 +93,10 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
       {/* Wizard Form Content */}
       <div className="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-start">
-        
+
         {/* Form Card */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col flex-1">
-          
+
           {/* Step Indicators */}
           {step < 6 && (
             <div className="flex justify-between items-center mb-6">
@@ -100,19 +104,18 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                 {[1, 2, 3, 4, 5].map((s) => (
                   <div
                     key={s}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      s === step ? 'w-8 bg-[#0066FF]' : s < step ? 'w-2 bg-[#0066FF]/40' : 'w-2 bg-gray-200'
-                    }`}
+                    className={`h-2 rounded-full transition-all duration-300 ${s === step ? 'w-8 bg-pink-500' : s < step ? 'w-2 bg-pink-500/40' : 'w-2 bg-gray-200'
+                      }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-semibold text-[#0066FF]">ขั้นตอน {step} จาก 5</span>
+              <span className="text-xs font-semibold text-pink-600">ขั้นตอน {step} จาก 5</span>
             </div>
           )}
 
           {/* Step Content */}
           <div className="flex-1 flex flex-col">
-            
+
             {/* STEP 1: General Info */}
             {step === 1 && (
               <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
@@ -129,32 +132,37 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="กรอกชื่อของคุณ"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800"
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">วันเกิด</label>
-                    <input
-                      type="date"
-                      value={birthday}
-                      onChange={handleBirthdayChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800"
-                    />
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">วันเกิด</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowDatePicker(true)}
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition text-left flex justify-between items-center h-12"
+                    >
+                      <span className={birthday ? 'font-medium text-gray-800' : 'text-gray-400'}>
+                        {birthday ? formatDisplay(birthday) : 'เลือกวันเกิดของคุณ'}
+                      </span>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-gray-400">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                      </svg>
+                    </button>
                   </div>
 
-                  {age !== '' && (
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">อายุ (ปี)</label>
-                      <input
-                        type="number"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
-                        placeholder="กรอกอายุของคุณ"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800 bg-gray-50"
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">อายุ (ปี)</label>
+                    <input
+                      disabled
+                      type="number"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                      placeholder="กรอกอายุของคุณ"
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition"
+                    />
+                  </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">เพศสภาพ</label>
@@ -162,22 +170,20 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setGender('MALE')}
-                        className={`py-3 rounded-xl border text-center font-medium transition ${
-                          gender === 'MALE'
-                            ? 'border-2 border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                        className={`py-3 rounded-xl border text-center font-medium transition ${gender === 'MALE'
+                            ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
                             : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         เพศชาย
                       </button>
                       <button
                         type="button"
                         onClick={() => setGender('FEMALE')}
-                        className={`py-3 rounded-xl border text-center font-medium transition ${
-                          gender === 'FEMALE'
-                            ? 'border-2 border-[#0066FF] bg-blue-50 text-[#0066FF]'
+                        className={`py-3 rounded-xl border text-center font-medium transition ${gender === 'FEMALE'
+                            ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
                             : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         เพศหญิง
                       </button>
@@ -187,11 +193,17 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
                 <button
                   onClick={() => {
-                    if (!name.trim()) return alert('กรุณากรอกชื่อเรียก');
-                    if (age === '' || Number(age) <= 0) return alert('กรุณาระบุวันเกิดหรือกรอกอายุที่ถูกต้อง');
+                    if (!name.trim()) {
+                      showAlert('warning', 'กรุณากรอกข้อมูล', 'กรุณากรอกชื่อเรียก');
+                      return;
+                    }
+                    if (age === '' || Number(age) <= 0) {
+                      showAlert('warning', 'ข้อมูลไม่ถูกต้อง', 'กรุณาระบุวันเกิดหรือกรอกอายุที่ถูกต้อง');
+                      return;
+                    }
                     setStep(2);
                   }}
-                  className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold transition shadow-sm mt-auto"
+                  className="w-full py-4 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-sm mt-auto"
                 >
                   ต่อไป
                 </button>
@@ -215,7 +227,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                         value={height}
                         onChange={(e) => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
                         placeholder="เช่น 165"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition"
                       />
                     </div>
                     <div>
@@ -225,7 +237,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                         value={weight}
                         onChange={(e) => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
                         placeholder="เช่น 55"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800"
+                        className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition"
                       />
                     </div>
                   </div>
@@ -241,11 +253,17 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
                 <button
                   onClick={() => {
-                    if (!weight || Number(weight) <= 0) return alert('กรุณาระบุน้ำหนักที่ถูกต้อง');
-                    if (!height || Number(height) <= 0) return alert('กรุณาระบุส่วนสูงที่ถูกต้อง');
+                    if (!weight || Number(weight) <= 0) {
+                      showAlert('warning', 'ข้อมูลไม่ถูกต้อง', 'กรุณาระบุน้ำหนักที่ถูกต้อง');
+                      return;
+                    }
+                    if (!height || Number(height) <= 0) {
+                      showAlert('warning', 'ข้อมูลไม่ถูกต้อง', 'กรุณาระบุส่วนสูงที่ถูกต้อง');
+                      return;
+                    }
                     setStep(3);
                   }}
-                  className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold transition shadow-sm mt-auto"
+                  className="w-full py-4 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-sm mt-auto"
                 >
                   ต่อไป
                 </button>
@@ -271,13 +289,12 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                     <button
                       key={item.key}
                       onClick={() => setActivityLevel(item.key as any)}
-                      className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${
-                        activityLevel === item.key
-                          ? 'border-2 border-[#0066FF] bg-blue-50/50'
+                      className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${activityLevel === item.key
+                          ? 'border-2 border-pink-500 bg-pink-50/50'
                           : 'border-gray-200 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
-                      <span className={`font-bold ${activityLevel === item.key ? 'text-[#0066FF]' : 'text-gray-800'}`}>
+                      <span className={`font-bold ${activityLevel === item.key ? 'text-pink-600' : 'text-gray-800'}`}>
                         {item.title}
                       </span>
                       <span className="text-xs text-gray-500 leading-normal">{item.desc}</span>
@@ -287,7 +304,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
                 <button
                   onClick={() => setStep(4)}
-                  className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold transition shadow-sm mt-4"
+                  className="w-full py-4 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-sm mt-4"
                 >
                   ต่อไป
                 </button>
@@ -311,13 +328,12 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                     <button
                       key={item.key}
                       onClick={() => setGoal(item.key as any)}
-                      className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${
-                        goal === item.key
-                          ? 'border-2 border-[#0066FF] bg-blue-50/50'
+                      className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${goal === item.key
+                          ? 'border-2 border-pink-500 bg-pink-50/50'
                           : 'border-gray-200 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
-                      <span className={`font-bold ${goal === item.key ? 'text-[#0066FF]' : 'text-gray-800'}`}>
+                      <span className={`font-bold ${goal === item.key ? 'text-pink-600' : 'text-gray-800'}`}>
                         {item.title}
                       </span>
                       <span className="text-xs text-gray-500 leading-normal">{item.desc}</span>
@@ -327,7 +343,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
                 <button
                   onClick={() => setStep(5)}
-                  className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold transition shadow-sm mt-auto"
+                  className="w-full py-4 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-sm mt-auto"
                 >
                   ต่อไป
                 </button>
@@ -350,17 +366,20 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                       value={targetWeight}
                       onChange={(e) => setTargetWeight(e.target.value === '' ? '' : Number(e.target.value))}
                       placeholder="เช่น 55"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0066FF] text-gray-800"
+                      className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-800 transition"
                     />
                   </div>
                 </div>
 
                 <button
                   onClick={() => {
-                    if (!targetWeight || Number(targetWeight) <= 0) return alert('กรุณาระบุน้ำหนักเป้าหมายที่ถูกต้อง');
+                    if (!targetWeight || Number(targetWeight) <= 0) {
+                      showAlert('warning', 'ข้อมูลไม่ถูกต้อง', 'กรุณาระบุน้ำหนักเป้าหมายที่ถูกต้อง');
+                      return;
+                    }
                     setStep(6);
                   }}
-                  className="w-full py-4 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-bold transition shadow-sm mt-auto"
+                  className="w-full py-4 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-bold transition shadow-sm mt-auto"
                 >
                   ต่อไป
                 </button>
@@ -370,7 +389,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
             {/* STEP 6: Summary / Result Page */}
             {step === 6 && (
               <div className="space-y-6 flex-grow flex flex-col items-center text-center justify-between animate-fade-in">
-                
+
                 {/* Illustration Image */}
                 <div className="w-full max-w-[240px] mx-auto py-2">
                   <img
@@ -383,24 +402,24 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                 {/* Summary Details */}
                 <div className="space-y-6 flex-grow flex flex-col justify-center">
                   <div>
-                    <h2 className="text-3xl font-extrabold text-[#0066FF] tracking-tight">นี่คือเป้าหมายของคุณ</h2>
+                    <h2 className="text-3xl font-extrabold text-pink-600 tracking-tight">นี่คือเป้าหมายของคุณ</h2>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-500 font-semibold mb-1">น้ำหนักเป้าหมายของคุณคือ</p>
-                    <p className="text-5xl font-black text-[#0066FF]">{targetWeight} kg</p>
+                    <p className="text-5xl font-black text-pink-500">{targetWeight} kg</p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-500 font-semibold mb-1">แคลอรีที่เหมาะสมต่อวัน</p>
-                    <p className="text-5xl font-black text-[#0066FF]">{calorieGoal} kCal</p>
+                    <p className="text-5xl font-black text-pink-500">{calorieGoal} kCal</p>
                   </div>
                 </div>
 
                 {/* Complete Button */}
                 <button
                   onClick={onSubmit}
-                  className="w-full py-4.5 rounded-full bg-[#0066FF] hover:bg-blue-700 text-white font-black text-lg tracking-wide shadow-md transition duration-200 mt-4 cursor-pointer"
+                  className="w-full py-4.5 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-black text-lg tracking-wide shadow-md transition duration-200 mt-4 cursor-pointer"
                 >
                   บันทึกข้อมูลและเริ่มใช้งาน
                 </button>
@@ -410,6 +429,14 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
           </div>
         </div>
       </div>
+      {/* Custom Calendar Overlay Modal */}
+      <DatePickerModal
+        isOpen={showDatePicker}
+        onClose={() => setShowDatePicker(false)}
+        birthday={birthday}
+        setBirthday={setBirthday}
+        setAge={setAge}
+      />
     </div>
   );
 };

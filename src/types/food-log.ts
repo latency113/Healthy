@@ -5,5 +5,6 @@ export interface FoodLog {
   protein: number;
   fat: number;
   carbs: number;
+  imageUrl?: string;
   loggedAt: string;
 }

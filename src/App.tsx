@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import liff from '@line/liff';
+import { showAlert } from './utils/alert';
 import type { FoodLog } from './types/food-log';
-import { calculateCalories } from './utils/calculations';
+import { calculateCalories, calculateAge } from './utils/calculations';
 import { HistoryView } from './views/HistoryView';
 import { ProfileWizardView } from './views/ProfileWizardView';
 
@@ -12,6 +13,7 @@ function App() {
   
   // Custom router state
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Profile Wizard Form States
   const [name, setName] = useState('');
@@ -23,6 +25,7 @@ function App() {
   const [activityLevel, setActivityLevel] = useState<'sedentary' | 'light' | 'moderate' | 'heavy' | 'super'>('moderate');
   const [goal, setGoal] = useState<'lose' | 'maintain' | 'gain'>('maintain');
   const [targetWeight, setTargetWeight] = useState<number | ''>('');
+  const [dailyCalorieGoal, setDailyCalorieGoal] = useState<number>(2000);
 
   useEffect(() => {
     // Sync with browser navigation
@@ -42,12 +45,24 @@ function App() {
           const userProfile = await liff.getProfile();
           setProfile(userProfile);
           setName(userProfile.displayName || '');
-          fetchHistory(userProfile.userId);
+          await Promise.all([
+            fetchHistory(userProfile.userId),
+            fetchProfile(userProfile.userId)
+          ]);
+          setLoading(false);
         } else {
           liff.login();
         }
       } catch (error) {
         console.error("LIFF Init Error:", error);
+        // Fallback for local testing
+        const mockUserId = 'mock-line-user-id';
+        setProfile({ userId: mockUserId, displayName: 'ผู้ทดสอบ' });
+        setName('ผู้ทดสอบ');
+        await Promise.all([
+          fetchHistory(mockUserId),
+          fetchProfile(mockUserId)
+        ]);
         setLoading(false);
       }
     };
@@ -57,15 +72,63 @@ function App() {
 
   const fetchHistory = async (lineUserId: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/history/${lineUserId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/history/${lineUserId}`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
       const data = await response.json();
       if (Array.isArray(data)) {
         setLogs(data);
       }
     } catch (error) {
       console.error("Fetch Error:", error);
+    }
+  };
+
+  const fetchProfile = async (lineUserId: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile/${lineUserId}`, {
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      });
+      const data = await response.json();
+      
+      const hasProfile = data.success && data.user && data.user.weight && data.user.height;
+
+      if (data.success && data.user) {
+        const u = data.user;
+        if (u.displayName) setName(u.displayName);
+        if (u.gender) setGender(u.gender);
+        if (u.weight) setWeight(u.weight);
+        if (u.height) setHeight(u.height);
+        if (u.birthday) {
+          const datePart = u.birthday.split('T')[0];
+          setBirthday(datePart);
+          const computedAge = calculateAge(datePart);
+          setAge(computedAge);
+        }
+        if (u.dailyCalorieGoal) setDailyCalorieGoal(u.dailyCalorieGoal);
+      }
+
+      if (isInitialLoad) {
+        if (hasProfile) {
+          // If profile is set up and they loaded /submit-user-profile, auto-redirect to /
+          if (window.location.pathname === '/submit-user-profile') {
+            navigateTo('/');
+          }
+        } else {
+          // If profile is not set up and they loaded /, auto-redirect to /submit-user-profile
+          if (window.location.pathname === '/') {
+            navigateTo('/submit-user-profile');
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Fetch Profile Error:", error);
     } finally {
-      setLoading(false);
+      setIsInitialLoad(false);
     }
   };
 
@@ -83,6 +146,7 @@ function App() {
       gender,
       weight,
       height,
+      birthday,
       dailyCalorieGoal: calculatedCalorie
     };
 
@@ -90,7 +154,8 @@ function App() {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/submit-user-profile`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
         },
         body: JSON.stringify(payload)
       });
@@ -100,11 +165,11 @@ function App() {
         }
         navigateTo('/');
       } else {
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        showAlert('error', 'เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       }
     } catch (err) {
       console.error(err);
-      alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      showAlert('error', 'เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
     } finally {
       setLoading(false);
     }
@@ -146,6 +211,7 @@ function App() {
       profile={profile}
       logs={logs}
       name={name}
+      dailyCalorieGoal={dailyCalorieGoal}
       navigateTo={navigateTo}
     />
   );

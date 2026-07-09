@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { FoodLog } from '../types/food-log';
 import { GindeeLogo } from '../components/GindeeLogo';
 
@@ -6,6 +6,7 @@ interface HistoryViewProps {
   profile: any;
   logs: FoodLog[];
   name: string;
+  dailyCalorieGoal: number;
   navigateTo: (path: string) => void;
 }
 
@@ -13,19 +14,69 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   profile,
   logs,
   name,
+  dailyCalorieGoal,
   navigateTo,
 }) => {
+  const [expandedDays, setExpandedDays] = useState<{ [key: string]: boolean }>({});
+
+  // Group logs by local date string (YYYY-MM-DD)
+  const groupedLogs = logs.reduce((groups: { [key: string]: FoodLog[] }, log) => {
+    const dateStr = log.loggedAt.split('T')[0]; // timezone safe date parsing
+    if (!groups[dateStr]) {
+      groups[dateStr] = [];
+    }
+    groups[dateStr].push(log);
+    return groups;
+  }, {});
+
+  // Sort dates descending (newest days first)
+  const sortedDates = Object.keys(groupedLogs).sort((a, b) => b.localeCompare(a));
+
+  // Expand the first day by default when logs load
+  useEffect(() => {
+    if (sortedDates.length > 0) {
+      setExpandedDays((prev) => ({
+        [sortedDates[0]]: true,
+        ...prev,
+      }));
+    }
+  }, [logs]);
+
+  const toggleDay = (dateStr: string) => {
+    setExpandedDays((prev) => ({
+      ...prev,
+      [dateStr]: !prev[dateStr],
+    }));
+  };
+
+  const formatDateLabel = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const isToday = date.toDateString() === today.toDateString();
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+    const formattedDate = date.toLocaleDateString('th-TH', options);
+
+    if (isToday) return `วันนี้ (${formattedDate})`;
+    if (isYesterday) return `เมื่อวานนี้ (${formattedDate})`;
+    return formattedDate;
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Yellow Top Banner */}
-      <div className="bg-[#fbc02d] px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-[#faf5f6] flex flex-col">
+      {/* Pink & White Top Banner */}
+      <div className="bg-white border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
         <div className="w-9" /> {/* Spacer */}
         <GindeeLogo />
         
         {/* Profile Settings Button */}
         <button
           onClick={() => navigateTo('/submit-user-profile')}
-          className="w-9 h-9 rounded-full bg-[#0066FF] flex items-center justify-center text-white hover:bg-blue-700 transition"
+          className="w-9 h-9 rounded-full bg-pink-500 flex items-center justify-center text-white hover:bg-pink-600 transition shadow-sm"
           aria-label="ตั้งค่าโปรไฟล์"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5">
@@ -41,7 +92,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           {profile?.pictureUrl ? (
             <img src={profile.pictureUrl} alt="profile" className="w-14 h-14 rounded-full border border-gray-200" />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+            <div className="w-14 h-14 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-500 font-bold text-lg">
               {name.charAt(0) || 'U'}
             </div>
           )}
@@ -51,7 +102,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           </div>
         </div>
 
-        {/* Meal Logs */}
+        {/* Grouped Meal Logs accordion */}
         <div className="space-y-4">
           {logs.length === 0 ? (
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center animate-fade-in">
@@ -60,35 +111,105 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
               <p className="text-xs text-gray-400 mt-1">คุณสามารถส่งรูปภาพอาหารหรือส่งข้อความบอกแชทบอทเพื่อบันทึกประวัติที่นี่</p>
             </div>
           ) : (
-            logs.map((log) => (
-              <div key={log.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 transition hover:shadow-md duration-200">
-                <div className="flex justify-between items-start mb-3">
-                  <h2 className="text-lg font-bold text-gray-800">{log.foodName}</h2>
-                  <span className="text-xs font-semibold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">
-                    {new Date(log.loggedAt).toLocaleDateString('th-TH')}
-                  </span>
+            sortedDates.map((dateStr) => {
+              const dayLogs = groupedLogs[dateStr];
+              const totalCalories = Math.round(dayLogs.reduce((sum, log) => sum + log.calories, 0));
+              const isOverGoal = totalCalories > dailyCalorieGoal;
+
+              return (
+                <div key={dateStr} className="bg-white rounded-xl p-4 border border-pink-100/60 shadow-sm space-y-3.5 transition-all duration-300">
+                  
+                  {/* Summary Header */}
+                  <div
+                    onClick={() => toggleDay(dateStr)}
+                    className="flex justify-between items-start cursor-pointer select-none"
+                  >
+                    <div className="space-y-1">
+                      <h3 className="font-extrabold text-gray-800 text-base">{formatDateLabel(dateStr)}</h3>
+                      <p className="text-xs text-gray-500">
+                        แคลอรี: <span className={isOverGoal ? 'text-rose-600 font-black' : 'text-pink-600'}>{totalCalories}</span> / {dailyCalorieGoal} kcal
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${isOverGoal ? 'bg-rose-500 animate-pulse' : 'bg-pink-500'}`} />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="3"
+                        stroke="currentColor"
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${
+                          expandedDays[dateStr] ? 'rotate-180' : ''
+                        }`}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full bg-pink-50/50 h-2 rounded-full overflow-hidden border border-pink-100/10">
+                    <div
+                      className={`h-full transition-all duration-500 rounded-full ${
+                        isOverGoal ? 'bg-gradient-to-r from-rose-500 to-red-600' : 'bg-gradient-to-r from-pink-400 to-pink-500'
+                      }`}
+                      style={{ width: `${Math.min((totalCalories / dailyCalorieGoal) * 100, 100)}%` }}
+                    />
+                  </div>
+
+                  {/* Expanded Food Logs Accordion Transition */}
+                  <div
+                    className={`grid transition-all duration-300 ease-in-out ${
+                      expandedDays[dateStr]
+                        ? 'grid-rows-[1fr] opacity-100'
+                        : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="space-y-3 pt-3.5 border-t border-pink-50/60 mt-1">
+                        {dayLogs.map((log) => (
+                          <div key={log.id} className="flex gap-3 bg-pink-50/10 p-3 rounded-2xl border border-pink-100/20">
+                            {log.imageUrl && (
+                              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-pink-100/40">
+                                <img src={log.imageUrl} alt={log.foodName} className="w-full h-full object-cover" />
+                              </div>
+                            )}
+                            <div className="flex-1 flex flex-col justify-between py-0.5">
+                              <div className="flex justify-between items-start gap-1">
+                                <h4 className="text-sm font-bold text-gray-800 leading-tight">{log.foodName}</h4>
+                                <span className="text-[9px] font-semibold text-gray-400 bg-white px-2 py-0.5 rounded-full border border-gray-100 flex-shrink-0">
+                                  {new Date(log.loggedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              
+                              <div className="grid grid-cols-4 gap-1.5 text-center text-[11px] font-bold mt-1.5">
+                                <div className="bg-orange-50/60 p-1 rounded-lg">
+                                  <p className="text-sm text-orange-600">{Math.round(log.calories)}</p>
+                                  <p className="text-sm text-gray-400 font-medium">แคล</p>
+                                </div>
+                                <div className="bg-red-50/60 p-1 rounded-lg">
+                                  <p className="text-sm text-red-600">{log.protein}</p>
+                                  <p className="text-sm text-gray-400 font-medium">โปรตีน</p>
+                                </div>
+                                <div className="bg-yellow-50/60 p-1 rounded-lg">
+                                  <p className="text-sm text-yellow-600">{log.fat}</p>
+                                  <p className="text-sm text-gray-400 font-medium">ไขมัน</p>
+                                </div>
+                                <div className="bg-green-50/60 p-1 rounded-lg">
+                                  <p className="text-sm text-green-600">{log.carbs}</p>
+                                  <p className="text-sm text-gray-400 font-medium">คาร์บ</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
-                
-                <div className="grid grid-cols-4 gap-2 text-center text-sm font-semibold">
-                  <div className="bg-orange-50/70 p-2 rounded-xl">
-                    <p className="font-extrabold text-orange-600 text-base">{log.calories}</p>
-                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">แคลอรี</p>
-                  </div>
-                  <div className="bg-red-50/70 p-2 rounded-xl">
-                    <p className="font-extrabold text-red-600 text-base">{log.protein}</p>
-                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">โปรตีน</p>
-                  </div>
-                  <div className="bg-yellow-50/70 p-2 rounded-xl">
-                    <p className="font-extrabold text-yellow-600 text-base">{log.fat}</p>
-                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">ไขมัน</p>
-                  </div>
-                  <div className="bg-green-50/70 p-2 rounded-xl">
-                    <p className="font-extrabold text-green-600 text-base">{log.carbs}</p>
-                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">คาร์บ</p>
-                  </div>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
