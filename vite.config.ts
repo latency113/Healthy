@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     allowedHosts: [
-      "wizard-sending-rats-passengers.trycloudflare.com"
+      process.env.VITE_ALLOWED_HOST
     ]
   }
 })
