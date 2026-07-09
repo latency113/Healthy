@@ -21,7 +21,7 @@ function App() {
     // 1. เริ่มต้นการทำงานของ LIFF
     const initLiff = async () => {
       try {
-        await liff.init({ liffId: "ใส่_LIFF_ID_ของคุณที่นี่" });
+        await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
         
         if (liff.isLoggedIn()) {
           const userProfile = await liff.getProfile();
@@ -43,7 +43,7 @@ function App() {
   const fetchHistory = async (lineUserId: string) => {
     try {
       // เปลี่ยน URL ตรงนี้เป็น URL ของ ngrok ที่ต่อท้ายด้วย /api/history/...
-      const response = await fetch(`https://rejoice-baked-example.ngrok-free.dev/api/history/${lineUserId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/history/${lineUserId}`);
       const data = await response.json();
       setLogs(data);
     } catch (error) {
