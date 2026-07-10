@@ -7,7 +7,7 @@ interface BottomNavBarProps {
 
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-xs w-[calc(100%-2rem)] bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-pink-100/50 p-1.5 flex gap-1.5 z-40 relative">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-xs w-[calc(100%-2rem)] bg-white/80 backdrop-blur-md rounded-full shadow-lg border border-pink-100/50 p-2.5 flex gap-1.5 z-40 relative">
       {/* Sliding background indicator pill */}
       <div
         className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.5625rem)] bg-pink-500 rounded-full transition-all duration-300 ease-out shadow-sm"
@@ -18,7 +18,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActive
 
       <button
         onClick={() => setActiveTab('history')}
-        className={`flex-1 py-3 rounded-full font-bold text-xs transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative z-10 ${
+        className={`flex-1 py-3 rounded-full  text-sm transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative z-10 ${
           activeTab === 'history'
             ? 'text-white'
             : 'text-gray-500 hover:text-pink-500'
@@ -31,7 +31,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActive
       </button>
       <button
         onClick={() => setActiveTab('profile')}
-        className={`flex-1 py-3 rounded-full font-bold text-xs transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative z-10 ${
+        className={`flex-1 py-3 rounded-full  text-sm transition-colors duration-300 flex items-center justify-center gap-1.5 cursor-pointer relative z-10 ${
           activeTab === 'profile'
             ? 'text-white'
             : 'text-gray-500 hover:text-pink-500'
