@@ -6,7 +6,7 @@ export const GindeeLogo = () => (
       </svg>
     </div>
     <a href="/">
-      <span className="text-2xl font-black text-pink-600 tracking-tight">LIFE APP</span>
+      <span className="text-2xl font-black text-pink-600 tracking-tight">Mealme :🥗)</span>
     </a>
   </div>
 );
