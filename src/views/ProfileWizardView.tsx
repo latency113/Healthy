@@ -67,9 +67,9 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
   const calorieGoal = calculateCalories(weight, height, age, gender, activityLevel, goal);
 
   return (
-    <div className="min-h-screen bg-[#faf5f6] flex flex-col">
+    <div className="h-screen bg-[#faf5f6] flex flex-col overflow-hidden">
       {/* Header Bar */}
-      <div className="bg-white border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
+      <div className="bg-white border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50 flex-shrink-0">
         <button
           onClick={() => {
             if (step > 1) {
@@ -92,10 +92,10 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
       </div>
 
       {/* Wizard Form Content */}
-      <div className="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-start">
+      <div className="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-start overflow-hidden">
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col flex-1">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col flex-1 overflow-hidden">
 
           {/* Step Indicators */}
           {step < 6 && (
@@ -114,17 +114,17 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
           )}
 
           {/* Step Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
 
             {/* STEP 1: General Info */}
             {step === 1 && (
-              <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
+              <div className="space-y-5 flex-1 flex flex-col animate-fade-in overflow-hidden">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800">ระบุข้อมูลของคุณ</h2>
                   <p className="text-sm text-gray-500">กรอกข้อมูลส่วนตัวทั่วไปเพื่อใช้ตั้งค่าเริ่มต้น</p>
                 </div>
 
-                <div className="space-y-4 flex-1">
+                <div className="space-y-4 flex-1 overflow-y-auto pr-1 py-1">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">ชื่อเรียก</label>
                     <input
@@ -212,13 +212,13 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
             {/* STEP 2: Weight, Height, BMI */}
             {step === 2 && (
-              <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
+              <div className="space-y-5 flex-1 flex flex-col animate-fade-in overflow-hidden">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800">น้ำหนักและส่วนสูง</h2>
                   <p className="text-sm text-gray-500">ระบุน้ำหนักให้กินดีปรับค่าทางโภชนาการให้เหมาะกับความต้องการของคุณ</p>
                 </div>
 
-                <div className="space-y-4 flex-1">
+                <div className="space-y-4 flex-1 overflow-y-auto pr-1 py-1">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">ส่วนสูง (ซม.)</label>
@@ -272,7 +272,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
             {/* STEP 3: Lifestyle */}
             {step === 3 && (
-              <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
+              <div className="space-y-5 flex-1 flex flex-col animate-fade-in overflow-hidden">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800">คุณมีไลฟ์สไตล์แบบใด</h2>
                   <p className="text-sm text-gray-500">ระบุความเคลื่อนไหวของคุณให้กินดีปรับค่าทางโภชนาการให้เหมาะกับความต้องการของคุณ</p>
@@ -313,13 +313,13 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
             {/* STEP 4: Goal */}
             {step === 4 && (
-              <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
+              <div className="space-y-5 flex-1 flex flex-col animate-fade-in overflow-hidden">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800">ระบุเป้าหมายของคุณ</h2>
                   <p className="text-sm text-gray-500">ระบุเป้าหมายของคุณให้กินดีปรับค่าทางโภชนาการให้เหมาะกับความต้องการของคุณ</p>
                 </div>
 
-                <div className="space-y-3 flex-1">
+                <div className="space-y-3 flex-1 overflow-y-auto pr-1 py-1">
                   {[
                     { key: 'lose', title: 'ลดน้ำหนัก', desc: 'ค่อยๆ ลดอย่างถูกวิธี ลดปริมาณแคลอรีเพื่อลดไขมันสะสม' },
                     { key: 'maintain', title: 'รักษาน้ำหนัก', desc: 'ควบคุมน้ำหนักให้อยู่ในเกณฑ์เดิม รักษามวลกล้ามเนื้อและความสมดุล' },
@@ -352,13 +352,13 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
             {/* STEP 5: Target Weight */}
             {step === 5 && (
-              <div className="space-y-5 flex-1 flex flex-col animate-fade-in">
+              <div className="space-y-5 flex-1 flex flex-col animate-fade-in overflow-hidden">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800">ตั้งน้ำหนักเป้าหมาย</h2>
                   <p className="text-sm text-gray-500">ระบุน้ำหนักให้กินดีปรับค่าทางโภชนาการให้เหมาะกับความต้องการของคุณ</p>
                 </div>
 
-                <div className="space-y-4 flex-1">
+                <div className="space-y-4 flex-1 overflow-y-auto pr-1 py-1">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">น้ำหนักเป้าหมาย (กก.)</label>
                     <input
@@ -388,7 +388,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
 
             {/* STEP 6: Summary / Result Page */}
             {step === 6 && (
-              <div className="space-y-6 flex-grow flex flex-col items-center text-center justify-between animate-fade-in">
+              <div className="space-y-6 flex-1 flex flex-col items-center text-center justify-between animate-fade-in overflow-y-auto pr-1 py-1">
 
                 {/* Illustration Image */}
                 <div className="w-full max-w-[240px] mx-auto py-2">

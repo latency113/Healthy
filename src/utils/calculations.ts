@@ -18,7 +18,7 @@ export const calculateBmi = (weight: number | '', height: number | ''): { bmi: n
   let label = '';
   let color = '';
   if (bmi < 18.5) {
-    label = 'น้ำหนักน้อยเกินไป / ผอม 🥺';
+    label = 'น้ำหนักน้อย / ผอม 🥺';
     color = 'text-yellow-600 bg-yellow-50 border-yellow-100';
   } else if (bmi < 23.0) {
     label = 'น้ำหนักปกติ / สุขภาพดี 😄';

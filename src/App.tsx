@@ -110,6 +110,9 @@ function App() {
           setAge(computedAge);
         }
         if (u.dailyCalorieGoal) setDailyCalorieGoal(u.dailyCalorieGoal);
+        if (u.goal) setGoal(u.goal);
+        if (u.targetWeight) setTargetWeight(u.targetWeight);
+        if (u.activityLevel) setActivityLevel(u.activityLevel);
       }
 
       if (isInitialLoad) {
@@ -147,7 +150,10 @@ function App() {
       weight,
       height,
       birthday,
-      dailyCalorieGoal: calculatedCalorie
+      dailyCalorieGoal: calculatedCalorie,
+      goal,
+      targetWeight,
+      activityLevel
     };
 
     try {
@@ -213,6 +219,13 @@ function App() {
       name={name}
       dailyCalorieGoal={dailyCalorieGoal}
       navigateTo={navigateTo}
+      weight={weight}
+      height={height}
+      age={age}
+      gender={gender}
+      targetWeight={targetWeight}
+      goal={goal}
+      activityLevel={activityLevel}
     />
   );
 }
