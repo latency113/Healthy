@@ -5,11 +5,40 @@ import type { FoodLog } from './types/food-log';
 import { calculateCalories, calculateAge } from './utils/calculations';
 import { HistoryView } from './views/HistoryView';
 import { ProfileWizardView } from './views/ProfileWizardView';
+import { AppLoader } from './components/AppLoader';
 
 function App() {
   const [logs, setLogs] = useState<FoodLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loaderProgress, setLoaderProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+
+  // Smooth loading progress simulation
+  useEffect(() => {
+    let interval: any;
+    if (loading) {
+      setShowLoader(true);
+      setLoaderProgress(0);
+      let current = 0;
+      interval = setInterval(() => {
+        if (current < 95) {
+          current += Math.floor(Math.random() * 10) + 5;
+          setLoaderProgress(Math.min(current, 95));
+        }
+      }, 70);
+    } else {
+      setLoaderProgress(100);
+      const timeout = setTimeout(() => {
+        setShowLoader(false);
+      }, 400);
+      return () => clearTimeout(timeout);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [loading]);
   
   // Custom router state
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -181,52 +210,50 @@ function App() {
     }
   };
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center text-lg text-gray-600">กำลังโหลดข้อมูล...</div>;
-  }
-
-  if (currentPath === '/submit-user-profile') {
-    return (
-      <ProfileWizardView
-        name={name}
-        setName={setName}
-        birthday={birthday}
-        setBirthday={setBirthday}
-        gender={gender}
-        setGender={setGender}
-        age={age}
-        setAge={setAge}
-        weight={weight}
-        setWeight={setWeight}
-        height={height}
-        setHeight={setHeight}
-        activityLevel={activityLevel}
-        setActivityLevel={setActivityLevel}
-        goal={goal}
-        setGoal={setGoal}
-        targetWeight={targetWeight}
-        setTargetWeight={setTargetWeight}
-        navigateTo={navigateTo}
-        onSubmit={handleSubmitProfile}
-      />
-    );
-  }
-
   return (
-    <HistoryView
-      profile={profile}
-      logs={logs}
-      name={name}
-      dailyCalorieGoal={dailyCalorieGoal}
-      navigateTo={navigateTo}
-      weight={weight}
-      height={height}
-      age={age}
-      gender={gender}
-      targetWeight={targetWeight}
-      goal={goal}
-      activityLevel={activityLevel}
-    />
+    <>
+      <AppLoader loading={loading} showLoader={showLoader} loaderProgress={loaderProgress} />
+      
+      {currentPath === '/submit-user-profile' ? (
+        <ProfileWizardView
+          name={name}
+          setName={setName}
+          birthday={birthday}
+          setBirthday={setBirthday}
+          gender={gender}
+          setGender={setGender}
+          age={age}
+          setAge={setAge}
+          weight={weight}
+          setWeight={setWeight}
+          height={height}
+          setHeight={setHeight}
+          activityLevel={activityLevel}
+          setActivityLevel={setActivityLevel}
+          goal={goal}
+          setGoal={setGoal}
+          targetWeight={targetWeight}
+          setTargetWeight={setTargetWeight}
+          navigateTo={navigateTo}
+          onSubmit={handleSubmitProfile}
+        />
+      ) : (
+        <HistoryView
+          profile={profile}
+          logs={logs}
+          name={name}
+          dailyCalorieGoal={dailyCalorieGoal}
+          navigateTo={navigateTo}
+          weight={weight}
+          height={height}
+          age={age}
+          gender={gender}
+          targetWeight={targetWeight}
+          goal={goal}
+          activityLevel={activityLevel}
+        />
+      )}
+    </>
   );
 }
 
