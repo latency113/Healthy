@@ -52,6 +52,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             name={name}
             logs={logs}
             dailyCalorieGoal={dailyCalorieGoal}
+            goal={goal}
           />
         )}
 
