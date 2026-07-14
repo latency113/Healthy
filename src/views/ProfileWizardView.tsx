@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GindeeLogo } from '../components/GindeeLogo';
+import { MealmeLogo } from '../components/MealmeLogo';
 import { DatePickerModal } from './profile-wizard/DatePickerModal';
 import { showAlert } from '../utils/alert';
 import { calculateBmi, calculateCalories } from '../utils/calculations';
@@ -86,7 +86,7 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
           </svg>
         </button>
 
-        <GindeeLogo />
+        <MealmeLogo />
 
         <div className="w-9 h-9" /> {/* Spacer */}
       </div>
@@ -171,8 +171,8 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                         type="button"
                         onClick={() => setGender('MALE')}
                         className={`py-3 rounded-xl border text-center font-medium transition ${gender === 'MALE'
-                            ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
-                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                          ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                           }`}
                       >
                         เพศชาย
@@ -181,8 +181,8 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                         type="button"
                         onClick={() => setGender('FEMALE')}
                         className={`py-3 rounded-xl border text-center font-medium transition ${gender === 'FEMALE'
-                            ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
-                            : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                          ? 'border-2 border-pink-500 bg-pink-50 text-pink-600'
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                           }`}
                       >
                         เพศหญิง
@@ -290,8 +290,8 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                       key={item.key}
                       onClick={() => setActivityLevel(item.key as any)}
                       className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${activityLevel === item.key
-                          ? 'border-2 border-pink-500 bg-pink-50/50'
-                          : 'border-gray-200 hover:bg-gray-50'
+                        ? 'border-2 border-pink-500 bg-pink-50/50'
+                        : 'border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                       <span className={`font-bold ${activityLevel === item.key ? 'text-pink-600' : 'text-gray-800'}`}>
@@ -329,8 +329,8 @@ export const ProfileWizardView: React.FC<ProfileWizardViewProps> = ({
                       key={item.key}
                       onClick={() => setGoal(item.key as any)}
                       className={`w-full p-4 rounded-2xl border text-left transition flex flex-col gap-1 ${goal === item.key
-                          ? 'border-2 border-pink-500 bg-pink-50/50'
-                          : 'border-gray-200 hover:bg-gray-50'
+                        ? 'border-2 border-pink-500 bg-pink-50/50'
+                        : 'border-gray-200 hover:bg-gray-50'
                         }`}
                     >
                       <span className={`font-bold ${goal === item.key ? 'text-pink-600' : 'text-gray-800'}`}>

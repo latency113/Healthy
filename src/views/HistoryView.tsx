@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { FoodLog } from '../types/food-log';
-import { GindeeLogo } from '../components/GindeeLogo';
+import { MealmeLogo } from '../components/MealmeLogo';
 import { MealLogsTab } from './history/MealLogsTab';
 import { HealthProfileTab } from './history/HealthProfileTab';
 import { BottomNavBar } from './history/BottomNavBar';
@@ -41,7 +41,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       {/* Pink & White Top Banner */}
       <div className="bg-white border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50 flex-shrink-0">
         <div className="w-9" /> {/* Spacer */}
-        <GindeeLogo />
+        <MealmeLogo />
         <div className="w-9" /> {/* Spacer */}
       </div>
 
